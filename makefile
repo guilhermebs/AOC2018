@@ -6,3 +6,8 @@ build/day01: src/day01.cpp src/helper.hpp
 	build/day01
 
 
+build/day02: src/day02.cpp src/helper.hpp
+	$(CXX) $(CXXFLAGS) src/day02.cpp -o build/day02
+	build/day02
+
+
