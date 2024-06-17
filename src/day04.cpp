@@ -39,6 +39,18 @@ class guard {
             return result;
         }
 
+        std::pair<uint, uint> most_frequent_minute() {
+            uint id_max_frequency = 0;
+            uint max_frequency = 0;
+            for (uint i=0; i<60; i++) {
+                if (sleep_minues[i] > max_frequency) {
+                    max_frequency = sleep_minues[i];
+                    id_max_frequency = i;
+                }
+            }
+            return std::pair<uint, uint>{max_frequency, id_max_frequency};
+        }
+
         void print() {
             for (int i=0; i < 60; i++) {
                 std::cout << sleep_minues[i] << " ";
@@ -48,7 +60,7 @@ class guard {
         
 };
 
-void solve_part1() {
+void solve() {
     std::ifstream file("inputs/day04");
     std::string line;
     std::vector<std::string> events;
@@ -86,24 +98,28 @@ void solve_part1() {
 
     int result = 0;
     uint max_sleep = 0;    
+    int result_pt2 = 0;
+    uint max_freq = 0;
     for (auto &[key, value]: guards) {
-        //std::cout << key << "," << max_sleep << std::endl;
         if (value.minutes_sleep() > max_sleep) {
             max_sleep = value.minutes_sleep();
-            std::cout << key << "," << max_sleep << std::endl;
             result = key * value.most_frequent_sleep();
         }
-
+        auto freq = value.most_frequent_minute();
+        if (freq.first > max_freq) {
+            max_freq = freq.first;
+            result_pt2 = freq.second * key;
+        }
     }
     std::cout << "Part 1 solution: " << result << std::endl;
+    std::cout << "Part 2 solution: " << result_pt2 << std::endl;
 
 }
 
 
 int main() {
     auto started = std::chrono::high_resolution_clock::now();
-    solve_part1();
-    //solve_part2();
+    solve();
     auto done = std::chrono::high_resolution_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "ms\n";
 }
