@@ -14,6 +14,10 @@ build/day03: src/day03.cpp src/helper.hpp
 	$(CXX) $(CXXFLAGS) src/day03.cpp -o build/day03
 	build/day03
 
+build/day04: src/day04.cpp
+	$(CXX) $(CXXFLAGS) src/day04.cpp -o build/day04
+	build/day04
+
 
 
 
