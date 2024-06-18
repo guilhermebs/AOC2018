@@ -1,18 +1,33 @@
 #include <fstream>
 #include <string>
+#include <vector>
+#include <algorithm>
 #include <iostream>
 
-bool react(std::string &polymer) {
+bool react(const std::string &polymer, std::vector<uint8_t> &mask) {
     bool result = false;
-    size_t i = 1;
+    size_t last_i = 0;
+    while (mask[last_i])
+        last_i++;
+    
+    size_t i = last_i + 1;
+    while (mask[i])
+        i++;
+    
     while (i < polymer.length()) {
-        auto ci = polymer[i-1];
+        auto ci = polymer[last_i];
         auto cii = polymer[i];
         if (isupper(ci) xor isupper(cii) && toupper(ci) == toupper(cii)) {
-            polymer.erase(i-1, 2);
+            mask[last_i] = 1;
+            mask[i] = 1;
             result = true;
         };
-        i++;
+        last_i = i;
+        while (mask[last_i])
+            last_i++;
+        i = last_i + 1;
+        while (mask[i])
+            i++;
     };
     return result;
 }
@@ -23,9 +38,11 @@ void solve_pt1 () {
     std::string polymer;
     getline(file, polymer);
     std::cout << polymer.length() << std::endl;
-    while (react(polymer))
+    std::vector<uint8_t> mask(polymer.length(), 0);
+    std::cout << "mask: " << std::endl;
+    while (react(polymer, mask))
         continue;
-    std::cout << "Part 1 solution: " << polymer.length() << std::endl;
+    std::cout << "Part 1 solution: " << std::count(mask.begin(), mask.end(), 0) << std::endl;
 }
 
 void solve_pt2 () {
@@ -35,17 +52,23 @@ void solve_pt2 () {
     static std::string units = "abcdefghijklmnopqrstuvxwyz";
     size_t min_count = polymer.length();
     for (auto u: units){
-        std::string polymer_clean = polymer;
-        while (react(polymer_clean))
+        std::vector<uint8_t> mask(polymer.length(), 0);
+        for (size_t i = 0; i < polymer.length(); i++) {
+            if (tolower(polymer[i]) == u)
+                mask[i] = 1;
+        }
+        while (react(polymer, mask))
             continue;
+        size_t count = std::count(mask.begin(), mask.end(), 0);
+        min_count = std::min(min_count, count);
     }
-    std::cout << "Part 2 solution: " << polymer.length() << std::endl;
+    std::cout << "Part 2 solution: " << min_count << std::endl;
 }
 
 int main() {
     auto started = std::chrono::high_resolution_clock::now();
     solve_pt1();
-    //solve_pt2();
+    solve_pt2();
     auto done = std::chrono::high_resolution_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "ms\n";
 }
