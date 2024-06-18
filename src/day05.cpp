@@ -1,33 +1,24 @@
 #include <fstream>
 #include <string>
-#include <vector>
-#include <algorithm>
 #include <iostream>
 
-bool react(const std::string &polymer, std::vector<uint8_t> &mask) {
+bool react(std::string &polymer) {
     bool result = false;
-    size_t last_i = 0;
-    while (mask[last_i])
-        last_i++;
-    
-    size_t i = last_i + 1;
-    while (mask[i])
-        i++;
-    
-    while (i < polymer.length()) {
-        auto ci = polymer[last_i];
-        auto cii = polymer[i];
+    int i = 0;
+    int ii = 1;
+    while (ii < (int) polymer.length()) {
+        auto ci = polymer[i];
+        auto cii = polymer[ii];
         if (isupper(ci) xor isupper(cii) && toupper(ci) == toupper(cii)) {
-            mask[last_i] = 1;
-            mask[i] = 1;
+            polymer.erase(polymer.begin() + i);
+            polymer.erase(polymer.begin() + ii - 1);
             result = true;
+            i = std::max(i-1, 0);
+            ii = std::max(i+1, ii-1);
+            continue;
         };
-        last_i = i;
-        while (mask[last_i])
-            last_i++;
-        i = last_i + 1;
-        while (mask[i])
-            i++;
+        ++i;
+        ++ii;
     };
     return result;
 }
@@ -37,12 +28,8 @@ void solve_pt1 () {
     std::ifstream file("inputs/day05");
     std::string polymer;
     getline(file, polymer);
-    std::cout << polymer.length() << std::endl;
-    std::vector<uint8_t> mask(polymer.length(), 0);
-    std::cout << "mask: " << std::endl;
-    while (react(polymer, mask))
-        continue;
-    std::cout << "Part 1 solution: " << std::count(mask.begin(), mask.end(), 0) << std::endl;
+    react(polymer);
+    std::cout << "Part 1 solution: " << polymer.length() << std::endl;
 }
 
 void solve_pt2 () {
@@ -52,15 +39,11 @@ void solve_pt2 () {
     static std::string units = "abcdefghijklmnopqrstuvxwyz";
     size_t min_count = polymer.length();
     for (auto u: units){
-        std::vector<uint8_t> mask(polymer.length(), 0);
-        for (size_t i = 0; i < polymer.length(); i++) {
-            if (tolower(polymer[i]) == u)
-                mask[i] = 1;
-        }
-        while (react(polymer, mask))
-            continue;
-        size_t count = std::count(mask.begin(), mask.end(), 0);
-        min_count = std::min(min_count, count);
+        std::string polymer_clean = polymer;
+        polymer_clean.erase(std::remove(polymer_clean.begin(), polymer_clean.end(), u), polymer_clean.end());
+        polymer_clean.erase(std::remove(polymer_clean.begin(), polymer_clean.end(), toupper(u)), polymer_clean.end());
+        react(polymer_clean);
+        min_count = std::min(min_count, polymer_clean.length());
     }
     std::cout << "Part 2 solution: " << min_count << std::endl;
 }
