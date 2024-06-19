@@ -24,7 +24,7 @@ bool react(std::string &polymer) {
 }
 
 
-void solve_pt1 () {
+void solve () {
     std::ifstream file("inputs/day05");
     std::string polymer;
     getline(file, polymer);
@@ -50,7 +50,7 @@ void solve_pt2 () {
 
 int main() {
     auto started = std::chrono::high_resolution_clock::now();
-    solve_pt1();
+    solve();
     solve_pt2();
     auto done = std::chrono::high_resolution_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "ms\n";

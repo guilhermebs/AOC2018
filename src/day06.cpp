@@ -12,7 +12,7 @@ struct point
 };
 
 
-void solve_pt1() {
+void solve() {
     std::ifstream file("inputs/day06");
     std::string line;
     std::vector<point> coordinates;
@@ -27,7 +27,6 @@ void solve_pt1() {
             stoi(line.substr(comma + 1))
        };
        coordinates.push_back(c);
-       std::cout << c.x << ", " << c.y << std::endl;
        max_x = std::max(max_x, c.x);
        max_y = std::max(max_y, c.y);
     }
@@ -35,6 +34,7 @@ void solve_pt1() {
     ++max_y;
 
     std::vector<int> locations(max_x*max_y, -99);
+    std::vector<uint8_t> region(max_x*max_y, 0);
     std::unordered_set<int> border_locations;
 
     for (int y = 0; y < max_y; y++)
@@ -43,6 +43,7 @@ void solve_pt1() {
         {
             int closest = -99;
             int closest_dist = INT_MAX;
+            int total_dist = 0;
             for (size_t i = 0; i < coordinates.size(); ++i) {
                 auto c = coordinates[i];
                 auto dist = labs(c.x - x) + labs(c.y - y);
@@ -51,14 +52,13 @@ void solve_pt1() {
                     closest = i;
                 } else if (dist == closest_dist)
                     closest = -99;
-                
+                total_dist += dist;
             }
             locations[x + max_x * y] = closest;
-            std::cout << closest << " ";
             if (x == 0 || x == max_x - 1 || y == 0 || y == max_y - 1)
                 border_locations.insert(closest);
+            region[x + max_x * y] = (total_dist < 10000);
         }
-        std::cout << std::endl;
     }
 
     int largest_area = 0;
@@ -70,14 +70,14 @@ void solve_pt1() {
         }
     }
     std::cout << "Part 1 solution: " << largest_area << std::endl;
+    std::cout << "Part 2 solution: " << std::count(region.begin(), region.end(), 1) << std::endl;
     
     
 }
 
 int main() {
     auto started = std::chrono::high_resolution_clock::now();
-    solve_pt1();
-    //solve_pt2();
+    solve();
     auto done = std::chrono::high_resolution_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "ms\n";
 }
