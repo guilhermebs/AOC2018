@@ -71,8 +71,6 @@ void solve() {
     }
     std::cout << "Part 1 solution: " << largest_area << std::endl;
     std::cout << "Part 2 solution: " << std::count(region.begin(), region.end(), 1) << std::endl;
-    
-    
 }
 
 int main() {
