@@ -16,6 +16,20 @@ class node {
                 result += c.sum_metadata();
             return result;
         }
+
+        int value() const {
+            int result = 0;
+            if (children.size() == 0) {
+                for (auto m: metadata)
+                    result += m;
+            } else {
+                for (auto m: metadata) {
+                    if (m > 0 && (size_t) m <= children.size())
+                        result += children[m - 1].value();
+                }
+            }
+            return result;
+        }
 };
 
 size_t create_node(const std::vector<int> &input, const size_t start, node &out) {
@@ -57,6 +71,7 @@ void solve() {
 
 
     std::cout << "Part 1 solution: " << root.sum_metadata() << std::endl;
+    std::cout << "Part 2 solution: " << root.value() << std::endl;
 }
 
 int main() {
