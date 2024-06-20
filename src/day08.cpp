@@ -3,9 +3,24 @@
 #include "helper.hpp"
 
 class node {
-    public:
+    private:
         std::vector<node> children;
         std::vector<int> metadata;
+
+    public:
+        node(std::vector<int>::iterator &input) {
+            size_t n_children = *(input++);
+            size_t n_metadata = *(input++);
+            children.reserve(n_children);
+            metadata.reserve(n_metadata);
+            for (size_t i = 0; i < n_children; i++)
+            {
+                children.push_back(node(input));
+            }
+            for (size_t i = 0; i < n_metadata; i++)
+                metadata.push_back(*(input++));
+            
+        }
     
         int sum_metadata() const {
             int result = 0;
@@ -32,25 +47,6 @@ class node {
         }
 };
 
-size_t create_node(const std::vector<int> &input, const size_t start, node &out) {
-    auto pos = start;
-    size_t n_children = input[pos++];
-    size_t n_metadata = input[pos++];
-    out.children.reserve(n_children);
-    out.metadata.reserve(n_metadata);
-    for (size_t i = 0; i < n_children; i++)
-    {
-        node child;
-        pos = create_node(input, pos, child);
-        out.children.push_back(child);
-    }
-
-    for (size_t i = 0; i < n_metadata; i++)
-        out.metadata.push_back(input[pos++]);
-    
-    return pos;
-}
-
 
 void solve() {
     std::ifstream file("inputs/day08");
@@ -66,9 +62,8 @@ void solve() {
     for (auto n: split)
         input.push_back(stoi(n));
 
-    node root;
-    create_node(input, 0, root);
-
+    std::vector<int>::iterator iter = input.begin();
+    node root(iter);
 
     std::cout << "Part 1 solution: " << root.sum_metadata() << std::endl;
     std::cout << "Part 2 solution: " << root.value() << std::endl;
