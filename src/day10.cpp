@@ -69,17 +69,12 @@ void solve() {
         lights.push_back(light(line));
     }
 
-    std::array<long long, 2> x_bb;
-    std::array<long long, 2> y_bb;
-    std::array<long long, 2> prev_x_bb;
-    std::array<long long, 2> prev_y_bb;
-    long long prev_area = __LONG_LONG_MAX__;
+    long long prev_area = LLONG_MAX;
+    size_t time4message;
     for (size_t t = 0; t < 100000; t++)
     {
-        prev_x_bb = x_bb;
-        prev_y_bb = y_bb;
-        x_bb = {INT_MAX, INT_MIN};
-        y_bb = {INT_MAX, INT_MIN};
+        std::array<long long, 2> x_bb = {INT_MAX, INT_MIN};
+        std::array<long long, 2> y_bb = {INT_MAX, INT_MIN};
 
         for (auto &l: lights) {
             l.evolve();
@@ -89,15 +84,19 @@ void solve() {
             y_bb[1] = std::max(y_bb[1], (long long) l.pos[0]);
         }
         long long area = (x_bb[1] - x_bb[0]) * (y_bb[1] - y_bb[0]);
-        if (area > prev_area)
+        if (area > prev_area) {
+            time4message = t;
             break;
+        }
         prev_area = area;
     }
     
     for (auto &l: lights)
         l.revert();
     
+    std::cout << "Part 1 solution: " << std::endl;
     print_lights(lights);
+    std::cout << "Part 2 solution: " << time4message << std::endl;
 }
 
 int main() {
