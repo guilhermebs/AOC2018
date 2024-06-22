@@ -38,6 +38,33 @@ void solve() {
     }
     std::cout << max_fuel << std::endl;
     std::cout << "Part 1 solution: " << max_x + 1 << "," << max_y + 1 << std::endl;
+
+    // Part 2
+    max_x = 0;
+    max_y = 0;
+    size_t max_size = 0;
+    max_fuel = INT_MIN;
+    for (size_t x = 0; x < size; x++) {
+        for (size_t y = 0; y < size; y++) {
+            size_t max_allowed_size = std::min(size - x, size - y) - 1;
+            for (size_t s = 1; s <= max_allowed_size; s++) {
+                int sum = 0;
+                for (size_t xx = x; xx < x + s; xx++) {
+                    for (size_t yy = y; yy < y + s; yy++) {
+                        sum += cells[xx + size * yy];
+                    }
+                }
+                if (sum > max_fuel) {
+                    max_fuel = sum;
+                    max_x = x;
+                    max_y = y;
+                    max_size = s;
+                }
+            }
+        }
+    }
+    std::cout << max_fuel << std::endl;
+    std::cout << "Part 2 solution: " << max_x + 1 << "," << max_y + 1 << "," << max_size << std::endl;
  
 }
 
