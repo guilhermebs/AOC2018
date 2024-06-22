@@ -54,20 +54,35 @@ class pot_collection {
 };
 
 
-void solve() {
+void solve_pt1() {
     pot_collection collection("inputs/day12");
-    collection.print();
     for (size_t i = 0; i < 20; i++) {
         collection.evolve();
-        collection.print();
     }
 
     std::cout << "Part 1 solution: " << collection.score() << std::endl;
 }
 
+void solve_pt2() {
+    pot_collection collection("inputs/day12");
+    int prev_score = 0;
+    int score = 0;
+    for (size_t i = 0; i < 1000; i++) {
+        collection.evolve();
+        prev_score = score;
+        score = collection.score();
+        std::cout << collection.score() << ", " << score - prev_score << std::endl;
+    }
+    // Looks like we get to a steady state
+    long long solution = score + (score - prev_score) * (50000000000L - 1000);
+    std::cout << "Part 2 solution: " << solution << std::endl;
+
+}
+
 int main() {
     auto started = std::chrono::high_resolution_clock::now();
-    solve();
+    //solve_pt1();
+    solve_pt2();
     auto done = std::chrono::high_resolution_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "ms\n";
 }
