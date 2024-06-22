@@ -21,11 +21,11 @@ void solve() {
     size_t max_x = 0;
     size_t max_y = 0;
     int max_fuel = INT_MIN;
-    for (size_t x = 0; x < size - 3; x++) {
-        for (size_t y = 0; y < size - 3; y++) {
+    for (size_t y = 0; y < size - 3; y++) {
+        for (size_t x = 0; x < size - 3; x++) {
             int sum = 0;
-            for (size_t xx = x; xx < x + 3; xx++) {
-                for (size_t yy = y; yy < y + 3; yy++) {
+            for (size_t yy = y; yy < y + 3; yy++) {
+                for (size_t xx = x; xx < x + 3; xx++) {
                     sum += cells[xx + size * yy];
                 }
             }
@@ -44,13 +44,13 @@ void solve() {
     max_y = 0;
     size_t max_size = 0;
     max_fuel = INT_MIN;
-    for (size_t x = 0; x < size; x++) {
-        for (size_t y = 0; y < size; y++) {
+    for (size_t y = 0; y < size; y++) {
+        for (size_t x = 0; x < size; x++) {
             size_t max_allowed_size = std::min(size - x, size - y) - 1;
             for (size_t s = 1; s <= max_allowed_size; s++) {
                 int sum = 0;
-                for (size_t xx = x; xx < x + s; xx++) {
-                    for (size_t yy = y; yy < y + s; yy++) {
+                for (size_t yy = y; yy < y + s; yy++) {
+                    for (size_t xx = x; xx < x + s; xx++) {
                         sum += cells[xx + size * yy];
                     }
                 }
