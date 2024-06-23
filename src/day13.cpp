@@ -67,10 +67,10 @@ class cart {
         }
 
         bool operator<(const cart &obj) const {
-            if (y == obj.y && x < obj.x)
-                return true;
+            if (y == obj.y)
+                return x < obj.x;
             return y < obj.y; 
-        } 
+        }
 
         void move(const std::vector<std::string> &map) {
             switch (dir)
@@ -145,21 +145,25 @@ class cart {
                     default:
                         break;
                     }
-                default:
+                case '-':
                     break;
+                case '|':
+                    break;
+                default:
+                    throw("Invalid char in map!");
             }
         }
 };
 
-bool crash_location(const std::vector<cart> &carts, size_t &crash_x, size_t &crash_y) {
+bool crash_location(const std::vector<cart> &carts, size_t &crash_i, size_t &crash_j) {
     bool result = false;
     for (size_t i = 0; i < carts.size(); i++)
     {
         for (size_t j = i + 1; j < carts.size(); j++)
         {
             if ((carts[i].x == carts[j].x) && (carts[i].y == carts[j].y)) {
-                crash_x = carts[i].x;
-                crash_y = carts[i].y;
+                crash_i = i;
+                crash_j = j;
                 return true;
             }
         }
@@ -191,16 +195,42 @@ void solve() {
         map.push_back(line);
         y++;
     }
-    size_t crash_x;
-    size_t crash_y;
-    while (!crash_location(carts, crash_x, crash_y))
+    size_t crash_i;
+    size_t crash_j;
+    while (!crash_location(carts, crash_i, crash_j))
     {
         std::sort(carts.begin(), carts.end());
         for (auto &c: carts) {
             c.move(map);
         }
     }
-    std::cout << "Part 1 result: " << crash_x << "," << crash_y << std::endl;
+    std::cout << "Part 1 result: " << carts[crash_i].x << "," << carts[crash_j].y << std::endl;
+    while (crash_location(carts, crash_i, crash_j)) {
+        carts.erase(carts.begin() + crash_j);
+        carts.erase(carts.begin() + crash_i);
+    }
+    while (carts.size() > 1)
+    {
+        std::sort(carts.begin(), carts.end());
+        std::vector<size_t> to_remove;
+        for (size_t i = 0; i < carts.size(); i++)
+        {
+            carts[i].move(map);
+            for (size_t j = 0; j < carts.size(); j++) {
+                if ((i != j) && (carts[i].x == carts[j].x) && (carts[i].y == carts[j].y)) {
+                    to_remove.push_back(i);
+                    to_remove.push_back(j);
+                }
+            }
+        }
+        std::sort(to_remove.begin(), to_remove.end(), std::greater<>());
+        std::unique(to_remove.begin(), to_remove.end());
+        for (auto i: to_remove) {
+            carts.erase(carts.begin() + i);
+        }
+    };
+
+    std::cout << "Part 2 result: " << carts[0].x << "," << carts[0].y << std::endl;
     
 }
 
