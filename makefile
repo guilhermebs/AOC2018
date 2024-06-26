@@ -58,3 +58,7 @@ build/day14: src/day14.cpp
 	$(CXX) $(CXXFLAGS) src/day14.cpp -o build/day14
 	build/day14
 
+build/day15: src/day15.cpp
+	$(CXX) $(CXXFLAGS) src/day15.cpp -o build/day15
+	build/day15
+

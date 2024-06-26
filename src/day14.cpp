@@ -32,7 +32,7 @@ void solve_pt1() {
     std::cout << std::endl;
 }
 
-bool check_pt2(const std::array<size_t, 6> &input, const std::vector <size_t> &recipes) {
+bool check_pt2(const std::array<size_t, 6> &input, const std::vector <uint16_t> &recipes) {
     auto r = recipes.end() - input.size();
     auto i = input.begin();
     while (r != recipes.end())
@@ -46,7 +46,7 @@ bool check_pt2(const std::array<size_t, 6> &input, const std::vector <size_t> &r
 
 void solve_pt2() {
     const std::array<size_t, 6> input = {9, 9, 0, 9, 4, 1};
-    std::vector<size_t> recipes = {3, 7};
+    std::vector<uint16_t> recipes = {3, 7};
 
     size_t elf1 = 0;
     size_t elf2 = 1;
