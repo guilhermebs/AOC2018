@@ -5,6 +5,8 @@
 #include <chrono>
 #include <vector>
 #include <array>
+#include <set>
+#include <algorithm>
 
 #include "helper.hpp"
 
@@ -51,13 +53,30 @@ operation read_operation (std::string line) {
     return result;
 }
 
+struct Observation {
+    registers before;
+    operation operation;
+    registers after;
+};
+
 void solve_pt1 () {
     std::ifstream file("inputs/day16");
     std::stringstream buffer;
-    std::vector<std::string> observations;
+    std::vector<std::string> observations_str;
+    std::vector<Observation> observations;
     buffer << file.rdbuf();
-    tokenize(buffer.str(), "\n\n", observations);
-
+    tokenize(buffer.str(), "\n\n", observations_str);
+    for (auto s:observations_str) {
+        if (s.length() == 0) break;
+        std::vector<std::string> lines;
+        tokenize(s, "\n", lines);
+        observations.push_back(Observation {
+            read_registers(lines[0]),
+            read_operation(lines[1]),
+            read_registers(lines[2]),
+        });
+    }
+ 
     std::vector<void (*)(registers &reg, uint a, uint b, uint c) > operations = {
         &addr,
         &addi,
@@ -78,24 +97,87 @@ void solve_pt1 () {
     };
 
     size_t part1_sol = 0;
-    size_t n = 0;
-    for (auto s:observations) {
-        if (s.length() == 0) break;
-        n++;
-        std::vector<std::string> lines;
-        tokenize(s, "\n", lines);
-        auto before = read_registers(lines[0]);
-        auto input = read_operation(lines[1]);
-        auto after = read_registers(lines[2]);
+    for (auto obs:observations) {
         size_t n_valid = 0;
         for (auto op: operations) {
-            auto reg = before;
-            (*op)(reg, input[1], input[2], input[3]);
-            if (reg == after) n_valid++;
+            auto reg = obs.before;
+            (*op)(reg, obs.operation[1], obs.operation[2], obs.operation[3]);
+            if (reg == obs.after) n_valid++;
         }
         part1_sol += (n_valid >= 3);
     }
     std::cout << "Part 1 solution: " << part1_sol << std::endl;
+
+    std::vector<std::set<size_t>> possible_op_numbers(operations.size());
+    size_t op_i = 0;
+    for (auto op: operations) {
+        bool fits_all;
+        for (size_t i = 0; i < operations.size(); i++) {
+            fits_all = true;
+            for (auto obs: observations) {
+                if (obs.operation[0] != i) continue;
+                auto reg = obs.before;
+                (*op)(reg, obs.operation[1], obs.operation[2], obs.operation[3]);
+                if (reg != obs.after)  {
+                    fits_all = false;
+                    break;
+                }
+            }
+            if (fits_all) {
+                possible_op_numbers[op_i].insert(i);
+            }
+        }
+        op_i++;
+    }
+    op_i = 0;
+    for (const auto &fits: possible_op_numbers) {
+        std::cout << op_i++ << ": ";
+        for (const auto &i: fits )
+            std::cout << i << " ";
+        std::cout << std::endl;
+    }
+
+    std::vector<size_t> op_numbers(operations.size());
+    bool modified = false;
+    do {
+        modified = false;
+        for (size_t opi = 0; opi < possible_op_numbers.size(); opi++) {
+            if (possible_op_numbers[opi].size() == 1) {
+                modified = true;
+                auto n = *(possible_op_numbers[opi].begin());
+                //op_numbers[opi] = m;
+                op_numbers[n] = opi;
+                for (auto &s: possible_op_numbers)
+                    s.erase(n);
+            }
+        }
+    } while (modified);
+
+    for (auto n: op_numbers)
+        std::cout << n << " ";
+    std::cout << std::endl;
+
+    // Check
+    for (auto obs: observations) {
+        auto reg = obs.before;
+        (*operations[op_numbers[obs.operation[0]]])(reg, obs.operation[1], obs.operation[2], obs.operation[3]);
+        if (reg != obs.after)  {
+            std::cout << "Problem with op number: " << obs.operation[0] << std::endl;
+        }
+    }
+    
+    // Run!
+    std::vector<std::string> test_program_str;
+    tokenize(*(observations_str.end() - 1), "\n", test_program_str);
+    registers reg = {0, 0, 0, 0};
+    for (auto &line: test_program_str) {
+        if (line == "") continue;
+        auto op = read_operation(line);
+        (*operations[op_numbers[op[0]]])(reg, op[1], op[2], op[3]);
+    }
+
+    std::cout << "Part 2 solution: " << reg[0] << std::endl;;
+
 };
 
 int main() {
