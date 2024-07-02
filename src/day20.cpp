@@ -36,9 +36,9 @@ coords_t change_coords(const coords_t &coords, char dir)
     return result;
 }
 
-coords_t create_room_map(const std::string &str, const coords_t &origin, map_t &room_map)
+std::unordered_set<coords_t> create_room_map(const std::string &str, const coords_t &origin, map_t &room_map)
 {
-    if (str.length() == 0) return origin;
+    if (str.length() == 0) return {origin};
     coords_t coords = origin;
     size_t level = 0;
     std::vector<size_t> next_level_marks;
@@ -70,20 +70,20 @@ coords_t create_room_map(const std::string &str, const coords_t &origin, map_t &
             coords = new_coords;
         }
     }
-    if (next_level_marks.size() == 0) return coords;
+    if (next_level_marks.size() == 0) return {coords};
     std::unordered_set<coords_t> next_c;
     for (size_t i = 0; i < next_level_marks.size() - 1; i++)
     {
         auto start = next_level_marks[i] + 1;
         auto len = next_level_marks[i+1] - next_level_marks[i] - 1;
         auto new_str = str.substr(start, len);
-        next_c.insert(create_room_map(new_str, coords, room_map));
+        next_c.merge(create_room_map(new_str, coords, room_map));
     }
     auto remaining = str.substr(next_level_marks.back() + 1);
-    std::cout << next_c.size() << std::endl;
+    std::unordered_set<coords_t> result;
     for (auto c: next_c)
-        coords = create_room_map(remaining, c, room_map);
-    return coords;
+        result.merge(create_room_map(remaining, c, room_map));
+    return result;
 }
 
 std::vector<coords_t> room_coords (const map_t &room_map)
@@ -142,7 +142,7 @@ void solve()
         auto &[dist, c] = queue.front();
         queue.pop_front();
         part1_sol = std::max(dist, part1_sol);
-        if (dist > 1000) part2_sol++;
+        if (dist >= 1000) part2_sol++;
         for (auto nc: room_map[c])
         {
             if (visited.contains(nc)) continue;
@@ -152,25 +152,6 @@ void solve()
     }
     std::cout << "Part 1 solution: " << part1_sol << std::endl;
     std::cout << "Part 2 solution: " << part2_sol << std::endl;
-    //auto coords = room_coords(room_map);
-    //coords_t most_distant;
-    //int max_distance = 0;
-    //for (auto &c: coords)
-    //{
-    //    auto dist = abs(std::get<0>(c)) + abs(std::get<1>(c));
-    //    std::cout << std::get<0>(c) << ", " << std::get<1>(c) << ": ";
-    //    for (auto &nc: room_map[c])
-    //        std::cout << "(" << std::get<0>(nc) << ", " << std::get<1>(nc) << "), ";
-    //    std::cout << std::endl;
-    //    if (dist > max_distance)
-    //    {
-    //        max_distance = dist;
-    //        most_distant = c;
-    //    }
-    //}
-    //std::cout << std::get<0>(most_distant) << ", " << std::get<1>(most_distant) << std::endl;
-    //auto dist = shortest_dist(room_map, origin, most_distant);
-    //std::cout << dist << std::endl;
 }
 
 int main() {
