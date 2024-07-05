@@ -2,7 +2,6 @@
 #include <vector>
 #include <string>
 #include <chrono>
-#include <tuple>
 #include <array>
 #include <algorithm>
 #include <numeric>
@@ -70,7 +69,7 @@ int play_round(std::vector<Group> &groups)
             if (gi.is_infection == gj.is_infection) continue;
             if (is_selected[j]) continue;
             auto pref = gi.attack_preference(gj);
-            std::cout << gi.name << " would deal " << pref[0] << " damage to " << gj.name << std::endl;
+            //std::cout << gi.name << " would deal " << pref[0] << " damage to " << gj.name << std::endl;
             if (pref > target_pref && pref[0] > 0)
             {
                 target_pref = pref;
@@ -81,19 +80,22 @@ int play_round(std::vector<Group> &groups)
         {
             is_selected[target] = 1;
             targets[i] = target;
-            //std::cout << "target: " << groups[target] << std::endl;
         }
     }
-    std::cout << std::endl;
+    //std::cout << std::endl;
     std::vector<size_t> indices(groups.size());
     std::iota(indices.begin(), indices.end(), 0);
     std::sort(indices.begin(), indices.end(), [&](size_t i, size_t j) { return groups[i].initiative > groups[j].initiative; });
+    int max_kills = 0;
     for (auto i: indices)
     {
         if (targets[i] == -1) continue;
         auto kills = groups[i].damage(groups[targets[i]], false);
-        std::cout << groups[i].name << " attacks " <<  groups[targets[i]].name <<", killing " << kills << std::endl;
+        max_kills = std::max(kills, max_kills);
+        //std::cout << groups[i].name << " attacks " <<  groups[targets[i]].name <<", killing " << kills << std::endl;
     }
+    if (max_kills == 0) return 0;
+
     groups.erase(std::remove_if(groups.begin(), groups.end(), [](Group &g) { return (g.units == 0); }), groups.end());
 
     auto pred = [](Group &g) { return g.is_infection; };
@@ -159,23 +161,57 @@ const std::vector<Group> input{
     Group("Infection 10", true, 2918, 36170, "bludgeoning", "slashing, cold", 24, "radiation", 1),
 };
 
+std::pair<bool, int> battle_results (std::vector<Group> groups)
+{
+    int result = -1;
+    while (result == -1)
+    {
+        result = play_round(groups);
+        //std::cout << std::endl;
+    }
+    return std::make_pair(groups[0].is_infection, result);
+}
+
 void solve_pt1()
 {
-    auto groups = input;
-    int solution = -1;
-    while (solution == -1)
-    {
-        solution = play_round(groups);
-        std::cout << std::endl;
-    }
-    std::cout << "Part 1 solution: " << solution << std::endl;
+    std::cout << "Part 1 solution: " << battle_results(input).second << std::endl;
+}
 
+std::vector<Group> boost(const std::vector<Group> &groups, int value)
+{
+    std::vector<Group> result = groups;
+    for (auto &g: result) 
+    {
+        if (!g.is_infection)
+            g.atk_damage += value;
+    }
+    return result;
+}
+
+
+void solve_pt2()
+{
+    auto groups = input;
+    int a = 0;
+    int b = 100000;
+    if (battle_results(boost(groups, b)).first)
+        std::cout << "Error!" << std::endl;
+    while (b - a != 1)
+    {
+        int x = (a + b) / 2;
+        auto [is_infection, result] = battle_results(boost(groups, x));
+        if (result == 0 || is_infection)
+            a = x;
+        else
+            b = x;
+    }
+    std::cout << "Part 2 solution: " << battle_results(boost(groups, b)).second << std::endl;
 }
 
 int main() {
     auto started = std::chrono::high_resolution_clock::now();
-    solve_pt1();
-    //solve_pt2();
+    //solve_pt1();
+    solve_pt2();
     auto done = std::chrono::high_resolution_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(done-started).count() << "ms\n";
 };
