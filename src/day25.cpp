@@ -18,7 +18,7 @@ inline int dist(const Point &p1, const Point &p2)
 std::vector<Point> gather_constellation(std::list<Point> &points)
 {
     std::vector<Point> result{points.front()};
-    points.front();
+    points.pop_front();
     while (true)
     {
         std::vector<std::list<Point>::iterator> add;
@@ -34,7 +34,6 @@ std::vector<Point> gather_constellation(std::list<Point> &points)
                 }
             }
         }
-        std::cout << add.size() << std::endl;
         if (add.size() == 0) break;
         std::reverse(add.end(), add.begin());
         for (auto p : add)
